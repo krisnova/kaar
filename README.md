@@ -1,6 +1,8 @@
-# Kubernetes Application Archive
+# kaar
 
-Bundle up a Kubernetes application into a single static OCI compliant archive. 
+Kubernetes Application Archive.
+
+Bundle up a Kubernetes application 📦 into a single static OCI compliant archive. 
 
  - Search for valid Kubernetes manifests (YAML)
  - Identify references to container images (OCI)
