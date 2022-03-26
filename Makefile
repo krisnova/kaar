@@ -11,14 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-#   ██████╗███████╗██████╗ ████████╗███████╗ █████╗ ██████╗
-#  ██╔════╝██╔════╝██╔══██╗╚══██╔══╝██╔════╝██╔══██╗██╔══██╗
-#  ██║     █████╗  ██████╔╝   ██║   ███████╗███████║██████╔╝
-#  ██║     ██╔══╝  ██╔══██╗   ██║   ╚════██║██╔══██║██╔══██╗
-#  ╚██████╗███████╗██║  ██║   ██║   ███████║██║  ██║██║  ██║
-#   ╚═════╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
-#
 
 all: compile
 
@@ -30,6 +22,18 @@ version="0.0.1"
 compile: ## Compile for the local architecture ⚙
 	@echo "Compiling..."
 	go build -ldflags "-X 'github.com/kris-nova/kaar.Version=$(version)'" -o kaar cmd/*.go
+
+install: ## Install 🎉
+	@echo "Installing..."
+	sudo cp kaar /usr/bin/kaar
+
+test: clean compile install ## 🤓 Test
+	@echo "Testing..."
+	go test -v ./...
+
+clean: ## Clean your artifacts 🧼
+	@echo "Cleaning..."
+	rm -rf kaar
 
 .PHONY: help
 help:  ## 🤔 Show help messages for make targets

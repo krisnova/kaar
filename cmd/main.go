@@ -50,6 +50,7 @@ func run() (error, int) {
 	app := &cli.App{
 		Name:      "Kubernetes Application Archive",
 		Author:    "Kris Nóva <kris@nivenly.com>",
+		Version:   kaar.Version,
 		UsageText: `kaar [flags] [archive.kaar] [path/]`,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{

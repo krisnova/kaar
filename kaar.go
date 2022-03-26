@@ -32,6 +32,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+var Version string
+
 // Create will attempt to create a kaarball from a directory
 func Create(dir string, path string) (*Archive, error) {
 	logger.Info("CREATE file: %s from directory: %s", path, dir)
