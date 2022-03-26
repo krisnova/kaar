@@ -1,25 +1,23 @@
 # Kubernetes Application Archive
 
-```
-                                                                                
-.------------------------------------------------- ------- -- -  -         hX!  
-|  ______. ____       __________         __________         ____________        
-: |      |/   /     _/     _    \___   _/     _    \___   _/     _      \       
-| |      /   /____  \      \X       \  \      \X       \  \      \\     /__     
-`-|      T\       \--\_      \       \--\_      \       \--\_     /_       \--- 
-  |______| \       \  /_______\       \  /_______\       \  /_______\       \   
-            \_______\\         \_______\\         \_______\\         \_______\\ 
-
-```
-
 Bundle up a Kubernetes application into a single static OCI compliant archive. 
 
-## Flags
+ - Search for valid Kubernetes manifests (YAML)
+ - Identify references to container images (OCI)
+ - Create a single OCI compliant artifact that contains all the application data, and container image data
+
+
+
+## Runtime
+
+`kaar` works just like Linux `tar`! 
 
 ``` 
+kaar
+
  -x Extract
  -f File
- -z Zip (gzip)
+ -z Zip
  -c Create
 ```
 
