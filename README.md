@@ -8,16 +8,21 @@ Bundle up a Kubernetes application 📦 into a single static OCI compliant archi
  - Identify references to container images (OCI)
  - Create a single OCI compliant artifact that contains all the application data, and container image data
 
-
-
 ## Runtime
 
-`kaar` works just like Linux `tar`! 
+`kaar` works just like Linux `tar`. 
 
-``` 
+```
+app/
+├── deploy.yaml   # References a container image
+├── Dockerfile
+├── main.go
+└── service.yaml
+
+
 kaar [flags] [archive] [path]
-kaar -cf myapp.kaar ./app/data        Create an archive 
-kaar -xf myapp.karr ./app/data        Extract an archive
+kaar -cf myapp.kaar ./app        Create an archive with container images referenced in deploy.yaml
+kaar -xf myapp.karr ./app        Extract an archive with container images referenced in deploy.yaml
 
  -x Extract
  -f File
