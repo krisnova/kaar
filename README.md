@@ -13,7 +13,9 @@ Bundle up a Kubernetes application into a single static OCI compliant archive.
 `kaar` works just like Linux `tar`! 
 
 ``` 
-kaar
+kaar [flags] [archive] [path]
+kaar -cf myapp.kaar ./app/data        Create an archive 
+kaar -xf myapp.karr ./app/data        Extract an archive
 
  -x Extract
  -f File
@@ -21,27 +23,13 @@ kaar
  -c Create
 ```
 
-### Archive
+### How it works
 
 `kaar` will recursively iterate through every file in the `path` and search for valid Kubernetes YAML.
 Next `kaar` will identify all container images referenced from the YAML.
 Finally `kaar` will archive the container images (local first, remote next) as well as the YAML from the local directory.
 The resulting archive will be saved as an OCI compliant container image that can be uploaded to any container registry.
 
-```bash 
-kaar [flags] [archive] [path]
-kaar -cf myapp.kaar ./app/data
-```
-
-### Unarchive
-
-`kaar` will preserve state by default.
-`kaar` can unarchive a `kaar` file into a local path.
-
-```bash 
-kaar [flags] [archive] [path]
-kaar -xf myapp.karr ./app/data
-```
 
 ### .kaar 
 
