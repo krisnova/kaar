@@ -10,7 +10,7 @@ Bundle up a Kubernetes application 📦 into a single static OCI compliant archi
 
 ## Runtime
 
-`kaar` works just like Linux `tar`. 
+`kaar` works just like Linux `tar`, which means good luck remembering the flags.
 
 ```
 app/
