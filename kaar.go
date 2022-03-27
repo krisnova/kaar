@@ -26,10 +26,23 @@ package kaar
 
 import (
 	"fmt"
+	"io/fs"
 	"io/ioutil"
+	"path/filepath"
+	"strings"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes/scheme"
 
 	"github.com/kris-nova/logger"
 	"github.com/mitchellh/go-homedir"
+)
+
+const (
+
+	//	Reference: https://yaml.org/spec/1.2/spec.html
+	//
+	YAMLDelimiter string = "\n---\n"
 )
 
 var Version string
@@ -39,11 +52,11 @@ func Create(dir string, path string) (*Archive, error) {
 	logger.Info("CREATE file: %s from directory: %s", path, dir)
 	// Glob directory
 	archive := NewArchive(dir)
-	err := archive.Read(dir)
+	err := archive.Load(dir)
 	if err != nil {
 		return nil, err
 	}
-	err = archive.Write(path)
+	err = archive.WriteArchive(path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to write kaarball: %v", err)
 	}
@@ -57,47 +70,60 @@ func Extract(dir string, path string) (*Archive, error) {
 }
 
 type Archive struct {
-	Path      string
-	Manifests map[string]*Manifest
+
+	// Reference path for the archive on disk
+	Path string
+
+	// Manifests are valid Kubernetes manifests
+	Manifests []*Manifest
+
+	// Files is every file in the directory
+	Files map[string]*fs.FileInfo
 }
 
+// NewArchive will create a new archive from a registered path
+// By convention the path should be the directory that may or may not
+// exist for a specific archive.
+//
+// path: directory to consider
 func NewArchive(path string) *Archive {
 	return &Archive{
-		Path:      path,
-		Manifests: make(map[string]*Manifest),
+		Path:  path,
+		Files: make(map[string]*fs.FileInfo),
 	}
 }
 
-// Write will write an archive to a given path
-func (a *Archive) Write(path string) error {
+// WriteArchive will write an archive to a given path
+func (a *Archive) WriteArchive(path string) error {
 	return nil
 }
 
-// Restore will restore an archive from memory
-//     dir the name of the directory to write
-func (a *Archive) Restore(dir string) error {
+// Extract will restore an archive from memory
+//
+// dir: the name of the directory to write
+func (a *Archive) Extract(dir string) error {
 	return nil
 }
 
-// Read will read the contents of a directory into memory
-func (a *Archive) Read(dir string) error {
+// Load will recursively load the contents of a directory into memory
+func (a *Archive) Load(dir string) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return fmt.Errorf("unable to read dir in filesystem: %v", err)
 	}
 	// Recursively look for Kubernetes manifests
 	for _, file := range files {
+		filename := filepath.Join(dir, file.Name())
 		// Look for Kubernetes YAML
 		if file.IsDir() {
-			a.Read(file.Name())
+			a.Load(filename)
 			continue
 		}
-		manifest, err := NewManifest(file.Name())
+		// Add files no matter what!
+		a.Files[filename] = &file
+		err := a.LoadManifests(filename)
 		if err != nil {
 			continue
-		}
-		if manifest != nil {
-			a.Manifests[manifest.Path] = manifest
 		}
 	}
 	return nil
@@ -105,15 +131,37 @@ func (a *Archive) Read(dir string) error {
 
 type Manifest struct {
 	// Path is the relative path of the manifest from the root directory
-	Path   string
-	Images map[string]*EmbeddedImage
+	Path    string
+	Images  map[string]*EmbeddedImage
+	Decoded runtime.Object
 }
 
-// NewManifest will attempt to parse a Kubernetes manifest
+// LoadManifests will attempt to parse a Kubernetes manifest
 // and sync it's relevant embedded images locally
-func NewManifest(path string) (*Manifest, error) {
-	fmt.Println(path)
-	return nil, nil
+func (a *Archive) LoadManifests(path string) error {
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("unable to read file path: %s: %v", path, err)
+	}
+	rawStr := string(raw)
+	yamlStrs := strings.Split(rawStr, YAMLDelimiter)
+	for _, yaml := range yamlStrs {
+		manifest := &Manifest{}
+		serializer := scheme.Codecs.UniversalDeserializer()
+		var decoded runtime.Object
+		decoded, _, err = serializer.Decode([]byte(yaml), nil, nil)
+		if err != nil {
+			logger.Warning("unable to serialize file: %v", err)
+			continue
+		}
+		manifest.Path = path
+		manifest.Decoded = decoded
+
+		a.Manifests = append(a.Manifests, manifest)
+		// TODO Container Images
+		fmt.Printf("** Manifest Found: %s **\n", manifest.Path)
+	}
+	return nil
 }
 
 // resolveDir will handle POSIX parlance

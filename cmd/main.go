@@ -30,7 +30,7 @@ import (
 
 	"github.com/kris-nova/kaar"
 	"github.com/kris-nova/logger"
-	"github.com/urfave/cli"
+	cli "github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -42,35 +42,53 @@ func main() {
 }
 
 func run() (error, int) {
+
 	var extract bool
 	var create bool
 	var verbose bool
 	var file bool
 
+	// cli assumes "-v" for version.
+	// override that here
+	cli.VersionFlag = &cli.BoolFlag{
+		Name:    "version",
+		Aliases: []string{"V"},
+		Usage:   "Print the version.",
+	}
+
 	app := &cli.App{
-		Name:      "Kubernetes Application Archive",
-		Author:    "Kris Nóva <kris@nivenly.com>",
-		Version:   kaar.Version,
+		Name:    "Kubernetes Application Archive",
+		Version: kaar.Version,
+		Authors: []*cli.Author{
+			{
+				Name:  "Kris Nóva",
+				Email: "kris@nivenly.com",
+			},
+		},
 		UsageText: `kaar [flags] [archive.kaar] [path/]`,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:        "x",
-				Usage:       "Extract. Used to extract a kaarball.",
+				Name:        "extract",
+				Aliases:     []string{"x"},
+				Usage:       "Used to extract a kaarball.",
 				Destination: &extract,
 			},
 			&cli.BoolFlag{
-				Name:        "c",
-				Usage:       "Create. Used to create a kaarball.",
+				Name:        "create",
+				Aliases:     []string{"c"},
+				Usage:       "Used to create a kaarball.",
 				Destination: &create,
 			},
 			&cli.BoolFlag{
-				Name:        "f",
-				Usage:       "File. Used to pass a file path.",
+				Name:        "file",
+				Aliases:     []string{"f"},
+				Usage:       "Used to pass a file path.",
 				Destination: &file,
 			},
 			&cli.BoolFlag{
-				Name:        "v",
-				Usage:       "Verbose. Toggle verbose logs.",
+				Name:        "verbose",
+				Aliases:     []string{"v"},
+				Usage:       "Toggle verbose logs.",
 				Destination: &verbose,
 			},
 		},
@@ -81,6 +99,10 @@ func run() (error, int) {
 			}
 			if create && extract {
 				return fmt.Errorf("invalid usage: unable to create and extract")
+			}
+			if c.NArg() == 0 {
+				cli.ShowAppHelp(c)
+				return nil
 			}
 			var kfile, kdir string
 			if !file {

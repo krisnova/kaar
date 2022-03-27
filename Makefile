@@ -16,7 +16,7 @@ all: compile
 
 # Global release version.
 # Change this to bump the build version!
-version="0.0.1"
+version="0.0.2"
 
 .PHONY: compile
 compile: ## Compile for the local architecture ⚙
