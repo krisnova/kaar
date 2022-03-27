@@ -56,6 +56,8 @@ func Create(dir string, path string) (*Archive, error) {
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("Found files     : %d", len(archive.Files))
+	logger.Info("Found manifests : %d", len(archive.Manifests))
 	err = archive.WriteArchive(path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to write kaarball: %v", err)
@@ -151,15 +153,15 @@ func (a *Archive) LoadManifests(path string) error {
 		var decoded runtime.Object
 		decoded, _, err = serializer.Decode([]byte(yaml), nil, nil)
 		if err != nil {
-			logger.Warning("unable to serialize file: %v", err)
+			//logger.Warning("unable to serialize file: %v", err)
 			continue
 		}
 		manifest.Path = path
 		manifest.Decoded = decoded
-
 		a.Manifests = append(a.Manifests, manifest)
 		// TODO Container Images
-		fmt.Printf("** Manifest Found: %s **\n", manifest.Path)
+
+		//fmt.Printf("** Manifest Found: %s **\n", manifest.Path)
 	}
 	return nil
 }
